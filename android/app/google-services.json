@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "607926820029",
+    "project_id": "aiesec-minha-jornada",
+    "storage_bucket": "aiesec-minha-jornada.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:607926820029:android:717bb05bd60e37df62abd4",
+        "android_client_info": {
+          "package_name": "com.example.aiesec_minha_jornada"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "607926820029-b1et0kloha1ippi9ih5qf3mqpjet8jgq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAf2WJ7TTmRl-I_Xu8p4R1bEL1dDC3QrPM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "607926820029-b1et0kloha1ippi9ih5qf3mqpjet8jgq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
