@@ -7,23 +7,23 @@ class CustomDropdown extends StatelessWidget {
   final String hintText;
   final String? value;
   final List<String> items;
-  final ValueChanged<String?> onChanged;
-  final String? Function(String?)? validator; 
+  final ValueChanged<String?>? onChanged;
+  final String? Function(String?)? validator;
 
   const CustomDropdown({
     super.key,
     required this.hintText,
     required this.items,
-    required this.onChanged,
+    this.onChanged,
     this.value,
-    this.validator, 
+    this.validator,
   });
 
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<String>(
       initialValue: value,
-      validator: validator, 
+      validator: validator,
       icon: const Icon(
         Icons.keyboard_arrow_down,
         color: AppColors.textSecondary,

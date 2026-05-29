@@ -11,6 +11,9 @@ import '../../enums/auth_enums.dart';
 import '../widgets/role_badge.dart';
 import '../widgets/step_progress_bar.dart';
 
+// Importe o seu serviço aqui (ajuste o caminho conforme a sua estrutura)
+import '../../data/services/comite_service.dart';
+
 class RegisterStep2View extends StatefulWidget {
   final UserRole role;
   final VoidCallback onBack;
@@ -28,20 +31,45 @@ class RegisterStep2View extends StatefulWidget {
 }
 
 class _RegisterStep2ViewState extends State<RegisterStep2View> {
-  final _formKey = GlobalKey<FormState>(); // <-- Chave do formulário do Passo 2
+  final _formKey = GlobalKey<FormState>();
   bool _acceptTerms = false;
   String? _selectedDropdownValue;
 
-  final List<String> _comitesLocais = [
-    'Florianópolis',
-    'Porto Alegre',
-    'Curitiba',
-    'São Paulo',
-  ];
+  // 1. Variáveis para o carregamento dinâmico
+  final ComiteService _comiteService = ComiteService();
+  List<String> _comitesLocais = [];
+  bool _isLoadingComites = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // 2. Dispara a busca apenas se o usuário for membro
+    if (widget.role == UserRole.membro) {
+      _carregarComites();
+    }
+  }
+
+  // 3. Função assíncrona que busca os dados no Firestore
+  Future<void> _carregarComites() async {
+    setState(() {
+      _isLoadingComites = true;
+    });
+
+    final comites = await _comiteService.buscarComitesAtivos();
+
+    // Se a tela ainda estiver montada após o await, atualiza o estado
+    if (mounted) {
+      setState(() {
+        // Mapeia a lista de ComiteModel apenas para os nomes (Strings)
+        _comitesLocais = comites.map((c) => c.nome).toList();
+        _isLoadingComites = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final List<String> _programasAiesec = AiesecProgram.values
+    final List<String> programasAiesec = AiesecProgram.values
         .map((e) => e.label)
         .toList();
     final String dropdownFieldName = widget.role == UserRole.membro
@@ -49,7 +77,7 @@ class _RegisterStep2ViewState extends State<RegisterStep2View> {
         : 'programa';
 
     return Form(
-      key: _formKey, 
+      key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -75,7 +103,7 @@ class _RegisterStep2ViewState extends State<RegisterStep2View> {
             hintText: 'Crie uma senha',
             prefixIcon: Icons.lock_outline,
             isPassword: true,
-            validator: FormValidators.password, 
+            validator: FormValidators.password,
           ),
           const SizedBox(height: 24),
 
@@ -86,23 +114,27 @@ class _RegisterStep2ViewState extends State<RegisterStep2View> {
             style: AppTextStyles.heading2,
           ),
           const SizedBox(height: 8),
+
+          // 4. Dropdown atualizado com estado de carregamento
           CustomDropdown(
             hintText: widget.role == UserRole.membro
-                ? 'Selecione seu CL'
+                ? (_isLoadingComites
+                      ? 'Carregando comitês...'
+                      : 'Selecione seu CL')
                 : 'Selecione seu tipo de intercâmbio',
             items: widget.role == UserRole.membro
                 ? _comitesLocais
-                : _programasAiesec,
+                : programasAiesec,
             value: _selectedDropdownValue,
-            validator: (value) => FormValidators.selection(
-              value,
-              fieldName: dropdownFieldName,
-            ), 
-            onChanged: (value) {
-              setState(() {
-                _selectedDropdownValue = value;
-              });
-            },
+            validator: (value) =>
+                FormValidators.selection(value, fieldName: dropdownFieldName),
+            onChanged: _isLoadingComites
+                ? null
+                : (value) {
+                    setState(() {
+                      _selectedDropdownValue = value;
+                    });
+                  },
           ),
           const SizedBox(height: 32),
           CustomCheckbox(
@@ -133,9 +165,7 @@ class _RegisterStep2ViewState extends State<RegisterStep2View> {
           PrimaryButton(
             text: 'Criar conta',
             onPressed: () {
-              // 1. Valida os campos de texto e dropdown
               if (_formKey.currentState!.validate()) {
-                // 2. Valida o checkbox de termos de uso de forma imperativa
                 if (!_acceptTerms) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -148,7 +178,6 @@ class _RegisterStep2ViewState extends State<RegisterStep2View> {
                   return;
                 }
 
-                // Fluxo final de submissão do Firebase entra aqui
                 print('Tudo validado! Cadastrando no Firebase...');
               }
             },
